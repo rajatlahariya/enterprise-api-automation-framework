@@ -1,4 +1,4 @@
-package com.rajat.framework.api.response;
+package com.rajat.framework.api.model;
 
 import java.util.Collections;
 import java.util.Map;

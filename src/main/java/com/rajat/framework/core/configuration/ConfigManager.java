@@ -75,4 +75,14 @@ public final class ConfigManager {
             throw new ConfigurationException("Failed to load configuration file: " + CONFIG_FILE, exception);
         }
     }
+    
+    public static String getApiVersion() {
+        String value = getProperties().getProperty("api.version");
+
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+
+        return value.trim();
+    }
 }

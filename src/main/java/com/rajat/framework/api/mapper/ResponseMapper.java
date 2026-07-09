@@ -3,7 +3,7 @@ package com.rajat.framework.api.mapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.rajat.framework.api.response.ApiResponse;
+import com.rajat.framework.api.model.ApiResponse;
 
 import io.restassured.response.Response;
 
