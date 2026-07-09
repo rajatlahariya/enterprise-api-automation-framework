@@ -17,4 +17,8 @@ public enum Endpoint {
     public String getpath() {
         return path;
     }
+    
+    public String getResolvedPath() {
+        return ApiPathResolver.resolve(this);
+    }
 }
