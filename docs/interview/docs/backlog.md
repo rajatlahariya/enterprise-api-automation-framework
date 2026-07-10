@@ -1,8 +1,8 @@
 # Framework Backlog
 
 ## Authentication
-- [ ] AuthenticationType
-- [ ] AuthenticationProvider
+- [x] AuthenticationType
+- [X] AuthenticationProvider
 - [ ] JWT
 - [ ] OAuth2 Client Credentials
 - [ ] Basic Authentication

@@ -32,12 +32,30 @@ public final class ConfigManager {
         return getRequiredProperty("auth.admin.password");
     }
 
+    public static String getUsername() {
+        return getAdminUsername();
+    }
+
+    public static String getPassword() {
+        return getAdminPassword();
+    }
+
     public static String getClientId() {
         return getRequiredProperty("auth.client.id");
     }
 
     public static String getClientSecret() {
         return getRequiredProperty("auth.client.secret");
+    }
+
+    public static String getApiVersion() {
+        String value = getProperties().getProperty("api.version");
+
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+
+        return value.trim();
     }
 
     private static String getRequiredProperty(String key) {
@@ -74,15 +92,5 @@ public final class ConfigManager {
         } catch (IOException exception) {
             throw new ConfigurationException("Failed to load configuration file: " + CONFIG_FILE, exception);
         }
-    }
-    
-    public static String getApiVersion() {
-        String value = getProperties().getProperty("api.version");
-
-        if (value == null || value.isBlank()) {
-            return "";
-        }
-
-        return value.trim();
     }
 }
