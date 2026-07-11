@@ -3,15 +3,21 @@ package com.rajat.framework.api.client;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.anyOf;
-
 import org.testng.annotations.Test;
+import static org.hamcrest.Matchers.containsString;
+import com.rajat.framework.api.mapper.ErrorResponseMapper;
+import com.rajat.framework.api.model.ErrorResponse;
+import com.rajat.framework.api.model.common.PagedResult;
+import com.rajat.framework.assertion.ResponseAssertions;
 
 import com.rajat.framework.api.model.ApiResponse;
 import com.rajat.framework.api.model.user.CreateUserRequest;
 import com.rajat.framework.api.model.user.UpdateUserRequest;
 import com.rajat.framework.api.model.user.User;
+import com.rajat.framework.api.model.user.UserSearchCriteria;
+import com.rajat.framework.assertion.JsonSchemaAssertions;
 import com.rajat.framework.data.UserDataFactory;
+import com.rajat.framework.testgroup.TestGroups;
 
 public class UserClientTest {
 
@@ -88,5 +94,71 @@ public class UserClientTest {
 		ApiResponse deleteResponse = userClient.deleteUser(createdUser.getId());
 
 		assertThat(deleteResponse.getStatusCode(), equalTo(204));
+	}
+
+	@Test
+	public void shouldMatchUserResponseSchema() {
+
+		UserClient userClient = new UserClient();
+
+		CreateUserRequest request = UserDataFactory.createDefaultUser();
+
+		User createdUser = null;
+
+		try {
+			createdUser = userClient.createUser(request);
+
+			ApiResponse response = userClient.getUserResponseById(createdUser.getId());
+
+			JsonSchemaAssertions.assertMatchesSchema(response, "schemas/user-response-schema.json");
+
+		} finally {
+			if (createdUser != null) {
+				userClient.deleteUser(createdUser.getId());
+			}
+		}
+	}
+
+	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	public void shouldReturnNotFoundForSoftDeletedUser() {
+
+		UserClient userClient = new UserClient();
+
+		CreateUserRequest request = UserDataFactory.createDefaultUser();
+
+		User createdUser = userClient.createUser(request);
+
+		ApiResponse deleteResponse = userClient.deleteUser(createdUser.getId());
+
+		ResponseAssertions.assertStatusCode(deleteResponse, 204);
+
+		ApiResponse getResponse = userClient.getUserResponseById(createdUser.getId());
+
+		ResponseAssertions.assertStatusCode(getResponse, 404);
+
+		ErrorResponse errorResponse = ErrorResponseMapper.from(getResponse);
+
+		assertThat(errorResponse.getSuccess(), equalTo(false));
+
+		assertThat(errorResponse.getMessage(), containsString("User not found"));
+	}
+
+	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	public void shouldReturnFirstPageOfUsers() {
+
+		UserClient userClient = new UserClient();
+
+		UserSearchCriteria criteria = UserSearchCriteria.builder().page(0).size(5).sort("id,asc").build();
+
+		PagedResult<User> result = userClient.getUsers(criteria);
+
+		assertThat(result, notNullValue());
+		assertThat(result.getPagination(), notNullValue());
+
+		assertThat(result.getPagination().getPage(), equalTo(0));
+
+		assertThat(result.getPagination().getSize(), equalTo(5));
+
+		assertThat(result.getNumberOfElements() <= 5, equalTo(true));
 	}
 }

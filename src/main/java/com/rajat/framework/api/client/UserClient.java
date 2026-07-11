@@ -2,13 +2,21 @@ package com.rajat.framework.api.client;
 
 import static io.restassured.RestAssured.given;
 
+import java.time.Duration;
+import java.util.Map;
+
+import com.rajat.framework.api.builder.QueryParameterBuilder;
 import com.rajat.framework.api.endpoint.Endpoint;
 import com.rajat.framework.api.mapper.ResponseMapper;
 import com.rajat.framework.api.mapper.UserMapper;
+import com.rajat.framework.api.mapper.UserPageMapper;
 import com.rajat.framework.api.model.ApiResponse;
+import com.rajat.framework.api.model.common.PagedResult;
 import com.rajat.framework.api.model.user.CreateUserRequest;
 import com.rajat.framework.api.model.user.UpdateUserRequest;
 import com.rajat.framework.api.model.user.User;
+import com.rajat.framework.api.model.user.UserSearchCriteria;
+import com.rajat.framework.core.retry.RetryExecutor;
 
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -27,6 +35,40 @@ public class UserClient extends BaseClient {
 	}
 
 	public User getUserById(Integer userId) {
+		return UserMapper.from(getUserResponseById(userId));
+	}
+
+	public User updateUser(Integer userId, UpdateUserRequest request) {
+
+		if (userId == null || userId <= 0) {
+			throw new IllegalArgumentException("User ID must be a positive number.");
+		}
+
+		RequestSpecification specification = authenticatedJsonSpecification();
+
+		Response response = given().spec(specification).pathParam("id", userId).body(request).when()
+				.put(Endpoint.USER_BY_ID.getResolvedPath());
+
+		ApiResponse apiResponse = ResponseMapper.toApiResponse(response);
+
+		return UserMapper.from(apiResponse);
+	}
+
+	public ApiResponse deleteUser(Integer userId) {
+
+		if (userId == null || userId <= 0) {
+			throw new IllegalArgumentException("User ID must be a positive number.");
+		}
+
+		RequestSpecification specification = authenticatedJsonSpecification();
+
+		Response response = given().spec(specification).pathParam("id", userId).when()
+				.delete(Endpoint.USER_BY_ID.getResolvedPath());
+
+		return ResponseMapper.toApiResponse(response);
+	}
+
+	public ApiResponse getUserResponseById(Integer userId) {
 
 		if (userId == null || userId <= 0) {
 			throw new IllegalArgumentException("User ID must be a positive number.");
@@ -37,52 +79,25 @@ public class UserClient extends BaseClient {
 		Response response = given().spec(specification).pathParam("id", userId).when()
 				.get(Endpoint.USER_BY_ID.getResolvedPath());
 
+		return ResponseMapper.toApiResponse(response);
+	}
+
+	public PagedResult<User> getUsers(UserSearchCriteria criteria) {
+
+		RequestSpecification specification = authenticatedJsonSpecification();
+
+		Map<String, Object> queryParameters = QueryParameterBuilder.from(criteria);
+
+		Response response = given().spec(specification).queryParams(queryParameters).when()
+				.get(Endpoint.USERS.getResolvedPath());
+
 		ApiResponse apiResponse = ResponseMapper.toApiResponse(response);
 
-		return UserMapper.from(apiResponse);
+		return UserPageMapper.from(apiResponse);
 	}
-	
-	public User updateUser(Integer userId, UpdateUserRequest request) {
 
-	    if (userId == null || userId <= 0) {
-	        throw new IllegalArgumentException(
-	                "User ID must be a positive number."
-	        );
-	    }
+	public User getUserByIdWithRetry(Integer id) {
 
-	    RequestSpecification specification =
-	            authenticatedJsonSpecification();
-
-	    Response response = given()
-	            .spec(specification)
-	            .pathParam("id", userId)
-	            .body(request)
-	        .when()
-	            .put(Endpoint.USER_BY_ID.getResolvedPath());
-
-	    ApiResponse apiResponse =
-	            ResponseMapper.toApiResponse(response);
-
-	    return UserMapper.from(apiResponse);
-	}
-	
-	public ApiResponse deleteUser(Integer userId) {
-
-	    if (userId == null || userId <= 0) {
-	        throw new IllegalArgumentException(
-	                "User ID must be a positive number."
-	        );
-	    }
-
-	    RequestSpecification specification =
-	            authenticatedJsonSpecification();
-
-	    Response response = given()
-	            .spec(specification)
-	            .pathParam("id", userId)
-	        .when()
-	            .delete(Endpoint.USER_BY_ID.getResolvedPath());
-
-	    return ResponseMapper.toApiResponse(response);
+		return RetryExecutor.execute(() -> getUserById(id), 3, Duration.ofMillis(250));
 	}
 }

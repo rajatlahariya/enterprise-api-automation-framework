@@ -1,0 +1,25 @@
+<suite name="Smoke Suite">
+
+	<test name="Smoke">
+
+		<groups>
+
+			<run>
+
+				<include name="smoke" />
+
+			</run>
+
+		</groups>
+
+		<classes>
+
+			<class name="com.rajat.framework.api.client.UserClientTest" />
+
+			<class name="com.rajat.framework.api.client.UserSearchTest" />
+
+		</classes>
+
+	</test>
+
+</suite>

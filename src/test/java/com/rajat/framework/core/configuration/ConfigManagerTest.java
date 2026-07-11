@@ -4,6 +4,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.rajat.framework.core.exceptions.ConfigurationException;
+import com.rajat.framework.testgroup.TestGroups;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -11,48 +12,48 @@ import static org.hamcrest.Matchers.startsWith;
 
 public class ConfigManagerTest {
 
-    @AfterMethod
-    public void cleanUp() {
-        System.clearProperty("env");
-    }
+	@AfterMethod
+	public void cleanUp() {
+		System.clearProperty("env");
+	}
 
-    @Test
-    public void shouldReturnLocalBaseUrlWhenEnvironmentIsNotProvided() {
+	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	public void shouldReturnLocalBaseUrlWhenEnvironmentIsNotProvided() {
 
-        String baseUrl = ConfigManager.getBaseUrl();
+		String baseUrl = ConfigManager.getBaseUrl();
 
-        assertThat(baseUrl, equalTo("http://localhost:8081"));
-    }
+		assertThat(baseUrl, equalTo("http://localhost:8081"));
+	}
 
-    @Test(expectedExceptions = ConfigurationException.class)
-    public void shouldThrowExceptionWhenEnvironmentIsInvalid() {
+	@Test(expectedExceptions = ConfigurationException.class)
+	public void shouldThrowExceptionWhenEnvironmentIsInvalid() {
 
-        System.setProperty("env", "production");
+		System.setProperty("env", "production");
 
-        ConfigManager.getBaseUrl();
-    }
+		ConfigManager.getBaseUrl();
+	}
 
-    @Test(expectedExceptions = ConfigurationException.class)
-    public void shouldThrowExceptionWhenEnvironmentUrlIsBlank() {
+	@Test(expectedExceptions = ConfigurationException.class)
+	public void shouldThrowExceptionWhenEnvironmentUrlIsBlank() {
 
-        System.setProperty("env", "qa");
+		System.setProperty("env", "qa");
 
-        ConfigManager.getBaseUrl();
-    }
+		ConfigManager.getBaseUrl();
+	}
 
-    @Test
-    public void shouldReturnAdminUsernameFromConfiguration() {
+	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	public void shouldReturnAdminUsernameFromConfiguration() {
 
-        String username = ConfigManager.getAdminUsername();
+		String username = ConfigManager.getAdminUsername();
 
-        assertThat(username, equalTo("rajat"));
-    }
+		assertThat(username, equalTo("rajat"));
+	}
 
-    @Test
-    public void shouldReturnClientIdFromConfiguration() {
+	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	public void shouldReturnClientIdFromConfiguration() {
 
-        String clientId = ConfigManager.getClientId();
+		String clientId = ConfigManager.getClientId();
 
-        assertThat(clientId, startsWith("rest-assured"));
-    }
+		assertThat(clientId, startsWith("rest-assured"));
+	}
 }
