@@ -1,0 +1,8 @@
+Decision:
+Authentication cycle removed.
+
+Reason:
+Factories should not depend on token lifecycle.
+
+Status:
+Accepted

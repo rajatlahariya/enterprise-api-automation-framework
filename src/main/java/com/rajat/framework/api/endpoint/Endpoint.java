@@ -14,7 +14,7 @@ public enum Endpoint {
         this.path = path;
     }
 
-    public String getpath() {
+    public String getPath() {
         return path;
     }
     

@@ -7,8 +7,8 @@ import com.rajat.framework.core.configuration.ConfigManager;
 
 public final class TokenManager {
 
-    private static AuthenticationToken cachedToken;
-
+	private static volatile AuthenticationToken cachedToken;
+	
     private TokenManager() {
         // Prevent object creation
     }

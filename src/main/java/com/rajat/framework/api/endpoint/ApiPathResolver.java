@@ -11,7 +11,7 @@ public final class ApiPathResolver {
     public static String resolve(Endpoint endpoint) {
 
         String apiVersion = ConfigManager.getApiVersion();
-        String endpointPath = endpoint.getpath();
+        String endpointPath = endpoint.getPath();
 
         if (apiVersion.isBlank()) {
             return endpointPath;

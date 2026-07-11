@@ -12,8 +12,6 @@ public final class ConfigManager {
 
     private static final String CONFIG_FILE = "framework.properties";
 
-    private static Properties properties;
-
     private ConfigManager() {
         // Prevent object creation
     }
@@ -62,35 +60,48 @@ public final class ConfigManager {
         String value = getProperties().getProperty(key);
 
         if (value == null || value.isBlank()) {
-            throw new ConfigurationException("Missing or blank configuration property: " + key);
+            throw new ConfigurationException(
+                    "Missing or blank configuration property: " + key
+            );
         }
 
         return value.trim();
     }
 
     private static Properties getProperties() {
-        if (properties == null) {
-            loadProperties();
-        }
-
-        return properties;
+        return PropertiesHolder.PROPERTIES;
     }
 
-    private static void loadProperties() {
-        properties = new Properties();
+    private static Properties loadProperties() {
+        Properties properties = new Properties();
 
         try (InputStream inputStream = ConfigManager.class
                 .getClassLoader()
                 .getResourceAsStream(CONFIG_FILE)) {
 
             if (inputStream == null) {
-                throw new ConfigurationException("Configuration file not found: " + CONFIG_FILE);
+                throw new ConfigurationException(
+                        "Configuration file not found: " + CONFIG_FILE
+                );
             }
 
             properties.load(inputStream);
+            return properties;
 
         } catch (IOException exception) {
-            throw new ConfigurationException("Failed to load configuration file: " + CONFIG_FILE, exception);
+            throw new ConfigurationException(
+                    "Failed to load configuration file: " + CONFIG_FILE,
+                    exception
+            );
+        }
+    }
+
+    private static final class PropertiesHolder {
+
+        private static final Properties PROPERTIES = loadProperties();
+
+        private PropertiesHolder() {
+            // Prevent object creation
         }
     }
 }
