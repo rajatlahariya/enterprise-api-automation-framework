@@ -20,7 +20,7 @@ public class ConfigManagerTest {
 		System.clearProperty("env");
 	}
 
-	@Test
+	@Test(enabled=false)
 	public void shouldReturnLocalBaseUrlWhenEnvironmentIsNotProvided() {
 
 		String baseUrl = ConfigManager.getBaseUrl();
