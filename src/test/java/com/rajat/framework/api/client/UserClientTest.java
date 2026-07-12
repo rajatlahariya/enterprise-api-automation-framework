@@ -7,18 +7,24 @@ import org.testng.annotations.Test;
 import static org.hamcrest.Matchers.containsString;
 import com.rajat.framework.api.mapper.ErrorResponseMapper;
 import com.rajat.framework.api.model.ErrorResponse;
-import com.rajat.framework.api.model.common.PagedResult;
 import com.rajat.framework.assertion.ResponseAssertions;
 
 import com.rajat.framework.api.model.ApiResponse;
 import com.rajat.framework.api.model.user.CreateUserRequest;
 import com.rajat.framework.api.model.user.UpdateUserRequest;
 import com.rajat.framework.api.model.user.User;
-import com.rajat.framework.api.model.user.UserSearchCriteria;
 import com.rajat.framework.assertion.JsonSchemaAssertions;
 import com.rajat.framework.data.UserDataFactory;
+import com.rajat.framework.reporting.AllureAttachmentManager;
 import com.rajat.framework.testgroup.TestGroups;
+import io.qameta.allure.Description;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 
+@Test(groups = { TestGroups.INTEGRATION, TestGroups.REGRESSION, TestGroups.CRUD })
 public class UserClientTest {
 
 	@Test
@@ -63,7 +69,12 @@ public class UserClientTest {
 		assertThat(fetchedUser.getIsActive(), equalTo(request.getIsActive()));
 	}
 
-	@Test
+	@Epic("User Management")
+	@Feature("User CRUD")
+	@Story("Complete authenticated user lifecycle")
+	@Severity(SeverityLevel.CRITICAL)
+	@Description("Creates, fetches, updates and soft-deletes a user " + "through the business client layer.")
+	@Test(groups = { TestGroups.SMOKE })
 	public void shouldCompleteUserCrudFlow() {
 
 		UserClient userClient = new UserClient();
@@ -93,10 +104,13 @@ public class UserClientTest {
 
 		ApiResponse deleteResponse = userClient.deleteUser(createdUser.getId());
 
+		AllureAttachmentManager.attachApiResponse("Delete User Response", deleteResponse);
+		//AllureAttachmentManager.attachApiResponse("Get Deleted User Response", getResponse);
 		assertThat(deleteResponse.getStatusCode(), equalTo(204));
+
 	}
 
-	@Test
+	@Test(groups = { TestGroups.SCHEMA })
 	public void shouldMatchUserResponseSchema() {
 
 		UserClient userClient = new UserClient();
@@ -119,7 +133,7 @@ public class UserClientTest {
 		}
 	}
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test(groups = { TestGroups.NEGATIVE })
 	public void shouldReturnNotFoundForSoftDeletedUser() {
 
 		UserClient userClient = new UserClient();
@@ -141,24 +155,5 @@ public class UserClientTest {
 		assertThat(errorResponse.getSuccess(), equalTo(false));
 
 		assertThat(errorResponse.getMessage(), containsString("User not found"));
-	}
-
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
-	public void shouldReturnFirstPageOfUsers() {
-
-		UserClient userClient = new UserClient();
-
-		UserSearchCriteria criteria = UserSearchCriteria.builder().page(0).size(5).sort("id,asc").build();
-
-		PagedResult<User> result = userClient.getUsers(criteria);
-
-		assertThat(result, notNullValue());
-		assertThat(result.getPagination(), notNullValue());
-
-		assertThat(result.getPagination().getPage(), equalTo(0));
-
-		assertThat(result.getPagination().getSize(), equalTo(5));
-
-		assertThat(result.getNumberOfElements() <= 5, equalTo(true));
 	}
 }

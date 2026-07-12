@@ -11,9 +11,10 @@ import com.rajat.framework.api.model.user.CreateUserRequest;
 import com.rajat.framework.api.model.user.UpdateUserRequest;
 import com.rajat.framework.testgroup.TestGroups;
 
+@Test(groups = {TestGroups.UNIT, TestGroups.REGRESSION, TestGroups.CRUD})
 public class UserDataFactoryTest {
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test
 	public void shouldCreateValidDefaultUserData() {
 
 		CreateUserRequest request = UserDataFactory.createDefaultUser();
@@ -26,7 +27,7 @@ public class UserDataFactoryTest {
 		assertThat(request.getIsActive(), equalTo(true));
 	}
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test
 	public void shouldCreateUpdatedUserDataWithExistingEmail() {
 
 		String existingEmail = "existing.user@enterprise.test";

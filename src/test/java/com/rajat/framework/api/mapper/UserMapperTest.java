@@ -9,9 +9,10 @@ import com.rajat.framework.api.model.ApiResponse;
 import com.rajat.framework.api.model.user.User;
 import com.rajat.framework.testgroup.TestGroups;
 
+@Test(groups = {TestGroups.UNIT, TestGroups.REGRESSION})
 public class UserMapperTest {
 
-	@Test(groups = { TestGroups.SEARCH, TestGroups.REGRESSION })
+	@Test
 	public void shouldMapUserSuccessfully() {
 
 		String body = "{" + "\"success\":true," + "\"message\":\"User fetched successfully\"," + "\"data\":{"
