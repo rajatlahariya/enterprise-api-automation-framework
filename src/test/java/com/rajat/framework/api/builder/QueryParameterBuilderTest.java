@@ -10,9 +10,10 @@ import org.testng.annotations.Test;
 import com.rajat.framework.api.model.user.UserSearchCriteria;
 import com.rajat.framework.testgroup.TestGroups;
 
+@Test(groups = {TestGroups.UNIT, TestGroups.REGRESSION, TestGroups.SEARCH})
 public class QueryParameterBuilderTest {
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test
 	public void shouldBuildOnlyPopulatedParameters() {
 
 		UserSearchCriteria criteria = UserSearchCriteria.builder().firstName("Raj").minAge(25).page(2).size(5)
@@ -35,10 +36,7 @@ public class QueryParameterBuilderTest {
 		assertThat(parameters.containsKey("isActive"), equalTo(false));
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class, groups =
-
-	{ TestGroups.SMOKE, TestGroups.CRUD })
-
+	@Test(expectedExceptions = IllegalArgumentException.class, groups = { TestGroups.NEGATIVE })
 	public void shouldRejectNullCriteria() {
 		QueryParameterBuilder.from(null);
 	}

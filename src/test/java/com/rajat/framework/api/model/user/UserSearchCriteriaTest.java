@@ -8,9 +8,10 @@ import org.testng.annotations.Test;
 
 import com.rajat.framework.testgroup.TestGroups;
 
+@Test(groups = {TestGroups.UNIT, TestGroups.REGRESSION, TestGroups.SEARCH})
 public class UserSearchCriteriaTest {
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test
 	public void shouldBuildDefaultPaginationCriteria() {
 
 		UserSearchCriteria criteria = UserSearchCriteria.builder().build();
@@ -21,7 +22,7 @@ public class UserSearchCriteriaTest {
 		assertThat(criteria.getFirstName(), nullValue());
 	}
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test
 	public void shouldBuildFilteringAndSortingCriteria() {
 
 		UserSearchCriteria criteria = UserSearchCriteria.builder().firstName(" Aarav ").email("enterprise.test")
@@ -38,13 +39,13 @@ public class UserSearchCriteriaTest {
 		assertThat(criteria.getSort(), equalTo("age,desc"));
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class, groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test(expectedExceptions = IllegalArgumentException.class, groups = { TestGroups.NEGATIVE })
 	public void shouldRejectInvalidAgeRange() {
 
 		UserSearchCriteria.builder().minAge(40).maxAge(20).build();
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class, groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test(expectedExceptions = IllegalArgumentException.class, groups = { TestGroups.NEGATIVE })
 	public void shouldRejectNegativePageNumber() {
 
 		UserSearchCriteria.builder().page(-1).build();

@@ -13,9 +13,10 @@ import com.rajat.framework.api.model.LoginRequest;
 import com.rajat.framework.core.configuration.ConfigManager;
 import com.rajat.framework.testgroup.TestGroups;
 
+@Test(groups = {TestGroups.INTEGRATION, TestGroups.REGRESSION, TestGroups.AUTHENTICATION})
 public class AuthClientTest {
 
-	@Test(groups = { TestGroups.NEGATIVE, TestGroups.REGRESSION })
+	@Test(groups = { TestGroups.SMOKE })
 	public void shouldLoginSuccessfullyWithValidCredentials() {
 
 		AuthClient authClient = new AuthClient();
@@ -30,7 +31,7 @@ public class AuthClientTest {
 		assertThat(response.getBody(), containsString("accessToken"));
 	}
 
-	@Test(groups = { TestGroups.NEGATIVE, TestGroups.REGRESSION })
+	@Test
 	public void shouldReturnAuthenticationTokenAfterSuccessfulLogin() {
 
 		AuthClient authClient = new AuthClient();

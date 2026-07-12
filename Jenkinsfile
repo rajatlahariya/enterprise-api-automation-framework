@@ -1,6 +1,10 @@
 pipeline {
 
     agent any
+     tools {
+        maven 'Maven 3.9'
+    }
+
 
     parameters {
 
@@ -29,6 +33,7 @@ pipeline {
     }
 
     options {
+		skipDefaultCheckout(true)
         timestamps()
         disableConcurrentBuilds()
         buildDiscarder(

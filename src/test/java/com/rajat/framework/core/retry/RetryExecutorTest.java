@@ -10,9 +10,10 @@ import org.testng.annotations.Test;
 
 import com.rajat.framework.testgroup.TestGroups;
 
+@Test(groups = {TestGroups.UNIT, TestGroups.REGRESSION})
 public class RetryExecutorTest {
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test
 	public void shouldReturnResultWithoutRetryWhenFirstAttemptSucceeds() {
 
 		AtomicInteger attempts = new AtomicInteger();
@@ -26,7 +27,7 @@ public class RetryExecutorTest {
 		assertThat(attempts.get(), equalTo(1));
 	}
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test
 	public void shouldRetryUntilOperationSucceeds() {
 
 		AtomicInteger attempts = new AtomicInteger();
@@ -45,7 +46,7 @@ public class RetryExecutorTest {
 		assertThat(attempts.get(), equalTo(3));
 	}
 
-	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Permanent failure")
+	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Permanent failure", groups = { TestGroups.NEGATIVE })
 	public void shouldThrowLastExceptionAfterMaximumAttempts() {
 
 		AtomicInteger attempts = new AtomicInteger();
@@ -61,13 +62,13 @@ public class RetryExecutorTest {
 		}
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class, groups = { TestGroups.NEGATIVE })
 	public void shouldRejectZeroMaximumAttempts() {
 
 		RetryExecutor.execute(() -> "SUCCESS", 0, Duration.ZERO);
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class, groups = { TestGroups.NEGATIVE })
 	public void shouldRejectNegativeRetryDelay() {
 
 		RetryExecutor.execute(() -> {
@@ -75,7 +76,7 @@ public class RetryExecutorTest {
 		}, 2, Duration.ofMillis(-1));
 	}
 
-	@Test(expectedExceptions = NullPointerException.class)
+	@Test(expectedExceptions = NullPointerException.class, groups = { TestGroups.NEGATIVE })
 	public void shouldRejectNullOperation() {
 
 		RetryExecutor.execute(null, 2, Duration.ZERO);

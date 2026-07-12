@@ -10,98 +10,114 @@ import com.rajat.framework.core.exceptions.ConfigurationException;
 
 public final class ConfigManager {
 
-    private static final String CONFIG_FILE = "framework.properties";
+	private static final String CONFIG_FILE = "framework.properties";
 
-    private ConfigManager() {
-        // Prevent object creation
-    }
+	private ConfigManager() {
+		// Prevent object creation
+	}
 
-    public static String getBaseUrl() {
-        Environment environment = EnvironmentManager.getActiveEnvironment();
-        String key = environment.name().toLowerCase() + ".base.url";
-        return getRequiredProperty(key);
-    }
+	public static String getBaseUrl() {
+		Environment environment = EnvironmentManager.getActiveEnvironment();
+		String key = environment.name().toLowerCase() + ".base.url";
+		return getRequiredProperty(key);
+	}
 
-    public static String getAdminUsername() {
-        return getRequiredProperty("auth.admin.username");
-    }
+	public static String getAdminUsername() {
+		return getRequiredProperty("auth.admin.username");
+	}
 
-    public static String getAdminPassword() {
-        return getRequiredProperty("auth.admin.password");
-    }
+	public static String getAdminPassword() {
+		return getRequiredProperty("auth.admin.password");
+	}
 
-    public static String getUsername() {
-        return getAdminUsername();
-    }
+	public static String getUsername() {
+		return getAdminUsername();
+	}
 
-    public static String getPassword() {
-        return getAdminPassword();
-    }
+	public static String getPassword() {
+		return getAdminPassword();
+	}
 
-    public static String getClientId() {
-        return getRequiredProperty("auth.client.id");
-    }
+	public static String getClientId() {
+		return getRequiredProperty("auth.client.id");
+	}
 
-    public static String getClientSecret() {
-        return getRequiredProperty("auth.client.secret");
-    }
+	public static String getClientSecret() {
+		return getRequiredProperty("auth.client.secret");
+	}
 
-    public static String getApiVersion() {
-        String value = getProperties().getProperty("api.version");
+	public static String getApiVersion() {
 
-        if (value == null || value.isBlank()) {
-            return "";
-        }
+		String value = getResolvedProperty("api.version");
 
-        return value.trim();
-    }
+		return value == null ? "" : value;
+	}
 
-    private static String getRequiredProperty(String key) {
-        String value = getProperties().getProperty(key);
+	private static String getRequiredProperty(String key) {
 
-        if (value == null || value.isBlank()) {
-            throw new ConfigurationException(
-                    "Missing or blank configuration property: " + key
-            );
-        }
+		String value = getResolvedProperty(key);
 
-        return value.trim();
-    }
+		if (value == null || value.isBlank()) {
+			throw new ConfigurationException("Missing or blank configuration property: " + key);
+		}
 
-    private static Properties getProperties() {
-        return PropertiesHolder.PROPERTIES;
-    }
+		return value;
+	}
 
-    private static Properties loadProperties() {
-        Properties properties = new Properties();
+	private static Properties getProperties() {
+		return PropertiesHolder.PROPERTIES;
+	}
 
-        try (InputStream inputStream = ConfigManager.class
-                .getClassLoader()
-                .getResourceAsStream(CONFIG_FILE)) {
+	private static Properties loadProperties() {
+		Properties properties = new Properties();
 
-            if (inputStream == null) {
-                throw new ConfigurationException(
-                        "Configuration file not found: " + CONFIG_FILE
-                );
-            }
+		try (InputStream inputStream = ConfigManager.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
 
-            properties.load(inputStream);
-            return properties;
+			if (inputStream == null) {
+				throw new ConfigurationException("Configuration file not found: " + CONFIG_FILE);
+			}
 
-        } catch (IOException exception) {
-            throw new ConfigurationException(
-                    "Failed to load configuration file: " + CONFIG_FILE,
-                    exception
-            );
-        }
-    }
+			properties.load(inputStream);
+			return properties;
 
-    private static final class PropertiesHolder {
+		} catch (IOException exception) {
+			throw new ConfigurationException("Failed to load configuration file: " + CONFIG_FILE, exception);
+		}
+	}
 
-        private static final Properties PROPERTIES = loadProperties();
+	private static final class PropertiesHolder {
 
-        private PropertiesHolder() {
-            // Prevent object creation
-        }
-    }
+		private static final Properties PROPERTIES = loadProperties();
+
+		private PropertiesHolder() {
+			// Prevent object creation
+		}
+	}
+
+	private static String getResolvedProperty(String key) {
+
+		String systemProperty = System.getProperty(key);
+
+		if (systemProperty != null && !systemProperty.isBlank()) {
+			return systemProperty.trim();
+		}
+
+		String environmentVariable = System.getenv(toEnvironmentVariableName(key));
+
+		if (environmentVariable != null && !environmentVariable.isBlank()) {
+			return environmentVariable.trim();
+		}
+
+		String propertyValue = getProperties().getProperty(key);
+
+		if (propertyValue == null || propertyValue.isBlank()) {
+			return null;
+		}
+
+		return propertyValue.trim();
+	}
+
+	private static String toEnvironmentVariableName(String key) {
+		return key.toUpperCase().replace('.', '_').replace('-', '_');
+	}
 }

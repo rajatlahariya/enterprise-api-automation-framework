@@ -13,9 +13,10 @@ import com.rajat.framework.api.model.common.PagedResult;
 import com.rajat.framework.api.model.user.User;
 import com.rajat.framework.testgroup.TestGroups;
 
+@Test(groups = {TestGroups.UNIT, TestGroups.REGRESSION, TestGroups.SEARCH})
 public class UserPageMapperTest {
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test
 	public void shouldMapPagedUserResponseSuccessfully() {
 
 		String body = "{" + "\"success\":true," + "\"message\":\"Users fetched successfully\"," + "\"data\":[" + "{"

@@ -11,9 +11,10 @@ import com.rajat.framework.api.model.ApiResponse;
 import com.rajat.framework.api.model.ErrorResponse;
 import com.rajat.framework.testgroup.TestGroups;
 
+@Test(groups = {TestGroups.UNIT, TestGroups.REGRESSION, TestGroups.NEGATIVE})
 public class ErrorResponseMapperTest {
 
-	@Test(groups = { TestGroups.SMOKE, TestGroups.CRUD })
+	@Test
 	public void shouldMapErrorResponseSuccessfully() {
 
 		String body = "{" + "\"success\":false," + "\"message\":\"User not found with id: 999\"," + "\"data\":null,"
