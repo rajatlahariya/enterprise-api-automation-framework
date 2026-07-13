@@ -19,11 +19,6 @@ public final class ConfigManager {
 	public static String getBaseUrl() {
 		Environment environment = EnvironmentManager.getActiveEnvironment();
 		String key = environment.name().toLowerCase() + ".base.url";
-		
-		
-		System.out.println("ENV      = " + EnvironmentManager.getActiveEnvironment());
-		System.out.println("BASE URL = " + ConfigManager.getBaseUrl());
-		System.out.println("DB URL   = " + ConfigManager.getDatabaseUrl());
 		return getRequiredProperty(key);
 		
 		
