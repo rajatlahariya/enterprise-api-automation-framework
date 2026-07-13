@@ -20,6 +20,8 @@ public final class ConfigManager {
 		Environment environment = EnvironmentManager.getActiveEnvironment();
 		String key = environment.name().toLowerCase() + ".base.url";
 		return getRequiredProperty(key);
+		
+		
 	}
 
 	public static String getAdminUsername() {
@@ -119,5 +121,21 @@ public final class ConfigManager {
 
 	private static String toEnvironmentVariableName(String key) {
 		return key.toUpperCase().replace('.', '_').replace('-', '_');
+	}
+
+	public static String getDatabaseUrl() {
+		Environment environment = EnvironmentManager.getActiveEnvironment();
+
+		String key = environment.name().toLowerCase() + ".db.url";
+
+		return getRequiredProperty(key);
+	}
+
+	public static String getDatabaseUsername() {
+		return getRequiredProperty("db.username");
+	}
+
+	public static String getDatabasePassword() {
+		return getRequiredProperty("db.password");
 	}
 }

@@ -15,12 +15,21 @@ import java.lang.reflect.Method;
 @Test(groups = { TestGroups.UNIT, TestGroups.REGRESSION })
 public class ConfigManagerTest {
 
+	private void restoreSystemProperty(String key, String originalValue) {
+
+		if (originalValue == null) {
+			System.clearProperty(key);
+		} else {
+			System.setProperty(key, originalValue);
+		}
+	}
+
 	@AfterMethod
 	public void cleanUp() {
 		System.clearProperty("env");
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	public void shouldReturnLocalBaseUrlWhenEnvironmentIsNotProvided() {
 
 		String baseUrl = ConfigManager.getBaseUrl();
@@ -52,7 +61,7 @@ public class ConfigManagerTest {
 		assertThat(username, equalTo("rajat"));
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	public void shouldReturnClientIdFromConfiguration() {
 
 		String clientId = ConfigManager.getClientId();
@@ -90,5 +99,45 @@ public class ConfigManagerTest {
 		String result = (String) method.invoke(null, "auth.admin.username");
 
 		assertThat(result, equalTo("AUTH_ADMIN_USERNAME"));
+	}
+
+	@Test
+	public void shouldReturnDatabaseUsernameFromSystemProperty() {
+
+		String key = "db.username";
+		String originalValue = System.getProperty(key);
+
+		try {
+			System.setProperty(key, "database-user");
+
+			assertThat(ConfigManager.getDatabaseUsername(), equalTo("database-user"));
+
+		} finally {
+			restoreSystemProperty(key, originalValue);
+		}
+	}
+
+	@Test
+	public void shouldResolveEnvironmentSpecificDatabaseUrl() {
+
+		String environmentKey = "env";
+		String databaseUrlKey = "dev.db.url";
+
+		String originalEnvironment = System.getProperty(environmentKey);
+
+		String originalDatabaseUrl = System.getProperty(databaseUrlKey);
+
+		try {
+			System.setProperty(environmentKey, "dev");
+
+			System.setProperty(databaseUrlKey, "jdbc:postgresql://localhost:5433/automationdb");
+
+			assertThat(ConfigManager.getDatabaseUrl(), equalTo("jdbc:postgresql://localhost:5433/automationdb"));
+
+		} finally {
+			restoreSystemProperty(environmentKey, originalEnvironment);
+
+			restoreSystemProperty(databaseUrlKey, originalDatabaseUrl);
+		}
 	}
 }

@@ -1,10 +1,20 @@
 pipeline {
 
     agent any
-     tools {
+
+    tools {
         maven 'Maven 3.9'
     }
 
+    environment {
+    ENV = "${params.ENVIRONMENT}"
+
+    DEV_BASE_URL =
+        'http://enterprise-user-api:8081'
+
+    DEV_DB_URL =
+        'jdbc:postgresql://enterprise-user-api-db:5432/automationdb'
+}
 
     parameters {
 
@@ -23,7 +33,6 @@ pipeline {
         choice(
             name: 'ENVIRONMENT',
             choices: [
-				'local',
                 'dev',
                 'qa',
                 'stage'
@@ -33,9 +42,10 @@ pipeline {
     }
 
     options {
-		skipDefaultCheckout(true)
+        skipDefaultCheckout(true)
         timestamps()
         disableConcurrentBuilds()
+
         buildDiscarder(
             logRotator(
                 numToKeepStr: '20'
@@ -60,64 +70,82 @@ pipeline {
             }
         }
 
-        stage('Execute Tests') {
-            steps {
+       stage('Verify Services') {
+    steps {
+        sh '''
+            set -e
 
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'enterprise-api-admin',
-                        usernameVariable: 'AUTH_ADMIN_USERNAME',
-                        passwordVariable: 'AUTH_ADMIN_PASSWORD'
-                    )
-                ]) {
+            echo "Resolving Docker services..."
+            getent hosts enterprise-user-api
+            getent hosts enterprise-user-api-db
 
-                    sh '''
-                        set +x
+            echo "Checking API port..."
+            timeout 10 bash -c \
+              'until </dev/tcp/enterprise-user-api/8081; do sleep 1; done'
 
-                        echo "Environment: $ENVIRONMENT"
-                        echo "Suite: $TEST_SUITE"
+            echo "Checking PostgreSQL port..."
+            timeout 10 bash -c \
+              'until </dev/tcp/enterprise-user-api-db/5432; do sleep 1; done'
 
-                        case "$TEST_SUITE" in
+            echo "API and database services are reachable."
+        '''
+    }
+}
 
-                            smoke)
-                                mvn clean test \
-                                  -Denv="$ENVIRONMENT" \
-                                  -Dsurefire.suiteXmlFiles=smoke.xml
-                                ;;
+       stage('Execute Tests') {
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'enterprise-api-admin',
+                usernameVariable: 'AUTH_ADMIN_USERNAME',
+                passwordVariable: 'AUTH_ADMIN_PASSWORD'
+            ),
+            usernamePassword(
+                credentialsId: 'enterprise-database',
+                usernameVariable: 'DB_USERNAME',
+                passwordVariable: 'DB_PASSWORD'
+            )
+        ]) {
+            sh '''
+                set +x
 
-                            regression)
-                                mvn clean test \
-                                  -Denv="$ENVIRONMENT" \
-                                  -Dsurefire.suiteXmlFiles=regression.xml
-                                ;;
+                echo "Environment: $ENV"
+                echo "Suite: $TEST_SUITE"
 
-                            unit)
-                                mvn clean test \
-                                  -Denv="$ENVIRONMENT" \
-                                  -Dsurefire.suiteXmlFiles=unit.xml
-                                ;;
+                case "$TEST_SUITE" in
+                    smoke)
+                        mvn clean test \
+                          -Dsurefire.suiteXmlFiles=smoke.xml
+                        ;;
 
-                            integration)
-                                mvn clean test \
-                                  -Denv="$ENVIRONMENT" \
-                                  -Dsurefire.suiteXmlFiles=integration.xml
-                                ;;
+                    regression)
+                        mvn clean test \
+                          -Dsurefire.suiteXmlFiles=regression.xml
+                        ;;
 
-                            full)
-                                mvn clean test \
-                                  -Denv="$ENVIRONMENT"
-                                ;;
+                    unit)
+                        mvn clean test \
+                          -Dsurefire.suiteXmlFiles=unit.xml
+                        ;;
 
-                            *)
-                                echo "Unsupported suite: $TEST_SUITE"
-                                exit 1
-                                ;;
+                    integration)
+                        mvn clean test \
+                          -Dsurefire.suiteXmlFiles=integration.xml
+                        ;;
 
-                        esac
-                    '''
-                }
-            }
+                    full)
+                        mvn clean test
+                        ;;
+
+                    *)
+                        echo "Unsupported suite: $TEST_SUITE"
+                        exit 1
+                        ;;
+                esac
+            '''
         }
+    }
+}
     }
 
     post {
