@@ -65,22 +65,27 @@ pipeline {
             }
         }
 
-        stage('Verify Services') {
-            steps {
-                sh '''
-                    getent hosts enterprise-user-api
-                    getent hosts enterprise-user-api-db
+       stage('Verify Services') {
+    steps {
+        sh '''
+            set -e
 
-                    timeout 5 sh -c \
-                      'until nc -z enterprise-user-api 8081; do sleep 1; done'
+            echo "Resolving Docker services..."
+            getent hosts enterprise-user-api
+            getent hosts enterprise-user-api-db
 
-                    timeout 5 sh -c \
-                      'until nc -z enterprise-user-api-db 5432; do sleep 1; done'
+            echo "Checking API port..."
+            timeout 10 bash -c \
+              'until </dev/tcp/enterprise-user-api/8081; do sleep 1; done'
 
-                    echo "API and database services are reachable."
-                '''
-            }
-        }
+            echo "Checking PostgreSQL port..."
+            timeout 10 bash -c \
+              'until </dev/tcp/enterprise-user-api-db/5432; do sleep 1; done'
+
+            echo "API and database services are reachable."
+        '''
+    }
+}
 
         stage('Execute Tests') {
             steps {
