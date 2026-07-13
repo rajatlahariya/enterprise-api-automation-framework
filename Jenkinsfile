@@ -7,9 +7,14 @@ pipeline {
     }
 
     environment {
-        API_BASE_URL = 'http://enterprise-user-api:8081'
-        DATABASE_URL = 'jdbc:postgresql://enterprise-user-api-db:5432/automationdb'
-    }
+    ENV = "${params.ENVIRONMENT}"
+
+    DEV_BASE_URL =
+        'http://enterprise-user-api:8081'
+
+    DEV_DB_URL =
+        'jdbc:postgresql://enterprise-user-api-db:5432/automationdb'
+}
 
     parameters {
 
@@ -87,74 +92,60 @@ pipeline {
     }
 }
 
-        stage('Execute Tests') {
-            steps {
+       stage('Execute Tests') {
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'enterprise-api-admin',
+                usernameVariable: 'AUTH_ADMIN_USERNAME',
+                passwordVariable: 'AUTH_ADMIN_PASSWORD'
+            ),
+            usernamePassword(
+                credentialsId: 'enterprise-database',
+                usernameVariable: 'DB_USERNAME',
+                passwordVariable: 'DB_PASSWORD'
+            )
+        ]) {
+            sh '''
+                set +x
 
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'enterprise-api-admin',
-                        usernameVariable: 'AUTH_ADMIN_USERNAME',
-                        passwordVariable: 'AUTH_ADMIN_PASSWORD'
-                    ),
-                    usernamePassword(
-                        credentialsId: 'enterprise-database',
-                        usernameVariable: 'DB_USERNAME',
-                        passwordVariable: 'DB_PASSWORD'
-                    )
-                ]) {
+                echo "Environment: $ENV"
+                echo "Suite: $TEST_SUITE"
 
-                    sh '''
-                        set +x
+                case "$TEST_SUITE" in
+                    smoke)
+                        mvn clean test \
+                          -Dsurefire.suiteXmlFiles=smoke.xml
+                        ;;
 
-                        echo "Environment: $ENVIRONMENT"
-                        echo "Suite: $TEST_SUITE"
+                    regression)
+                        mvn clean test \
+                          -Dsurefire.suiteXmlFiles=regression.xml
+                        ;;
 
-                        COMMON_ARGUMENTS="\
-                          -Denv=$ENVIRONMENT \
-                          -D${ENVIRONMENT}.base.url=$API_BASE_URL \
-                          -D${ENVIRONMENT}.db.url=$DATABASE_URL"
+                    unit)
+                        mvn clean test \
+                          -Dsurefire.suiteXmlFiles=unit.xml
+                        ;;
 
-                        case "$TEST_SUITE" in
+                    integration)
+                        mvn clean test \
+                          -Dsurefire.suiteXmlFiles=integration.xml
+                        ;;
 
-                            smoke)
-                                mvn clean test \
-                                  $COMMON_ARGUMENTS \
-                                  -Dsurefire.suiteXmlFiles=smoke.xml
-                                ;;
+                    full)
+                        mvn clean test
+                        ;;
 
-                            regression)
-                                mvn clean test \
-                                  $COMMON_ARGUMENTS \
-                                  -Dsurefire.suiteXmlFiles=regression.xml
-                                ;;
-
-                            unit)
-                                mvn clean test \
-                                  $COMMON_ARGUMENTS \
-                                  -Dsurefire.suiteXmlFiles=unit.xml
-                                ;;
-
-                            integration)
-                                mvn clean test \
-                                  $COMMON_ARGUMENTS \
-                                  -Dsurefire.suiteXmlFiles=integration.xml
-                                ;;
-
-                            full)
-                                mvn clean test \
-                                  $COMMON_ARGUMENTS
-                                ;;
-
-                            *)
-                                echo "Unsupported suite: $TEST_SUITE"
-                                exit 1
-                                ;;
-
-                        esac
-                    '''
-                }
-            }
+                    *)
+                        echo "Unsupported suite: $TEST_SUITE"
+                        exit 1
+                        ;;
+                esac
+            '''
         }
+    }
+}
     }
 
     post {
