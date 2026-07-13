@@ -1,10 +1,15 @@
 pipeline {
 
     agent any
-     tools {
+
+    tools {
         maven 'Maven 3.9'
     }
 
+    environment {
+        API_BASE_URL = 'http://enterprise-user-api:8081'
+        DATABASE_URL = 'jdbc:postgresql://enterprise-user-api-db:5432/automationdb'
+    }
 
     parameters {
 
@@ -23,7 +28,6 @@ pipeline {
         choice(
             name: 'ENVIRONMENT',
             choices: [
-				'local',
                 'dev',
                 'qa',
                 'stage'
@@ -33,9 +37,10 @@ pipeline {
     }
 
     options {
-		skipDefaultCheckout(true)
+        skipDefaultCheckout(true)
         timestamps()
         disableConcurrentBuilds()
+
         buildDiscarder(
             logRotator(
                 numToKeepStr: '20'
@@ -60,6 +65,23 @@ pipeline {
             }
         }
 
+        stage('Verify Services') {
+            steps {
+                sh '''
+                    getent hosts enterprise-user-api
+                    getent hosts enterprise-user-api-db
+
+                    timeout 5 sh -c \
+                      'until nc -z enterprise-user-api 8081; do sleep 1; done'
+
+                    timeout 5 sh -c \
+                      'until nc -z enterprise-user-api-db 5432; do sleep 1; done'
+
+                    echo "API and database services are reachable."
+                '''
+            }
+        }
+
         stage('Execute Tests') {
             steps {
 
@@ -68,6 +90,11 @@ pipeline {
                         credentialsId: 'enterprise-api-admin',
                         usernameVariable: 'AUTH_ADMIN_USERNAME',
                         passwordVariable: 'AUTH_ADMIN_PASSWORD'
+                    ),
+                    usernamePassword(
+                        credentialsId: 'enterprise-database',
+                        usernameVariable: 'DB_USERNAME',
+                        passwordVariable: 'DB_PASSWORD'
                     )
                 ]) {
 
@@ -77,35 +104,40 @@ pipeline {
                         echo "Environment: $ENVIRONMENT"
                         echo "Suite: $TEST_SUITE"
 
+                        COMMON_ARGUMENTS="\
+                          -Denv=$ENVIRONMENT \
+                          -D${ENVIRONMENT}.base.url=$API_BASE_URL \
+                          -D${ENVIRONMENT}.db.url=$DATABASE_URL"
+
                         case "$TEST_SUITE" in
 
                             smoke)
                                 mvn clean test \
-                                  -Denv="$ENVIRONMENT" \
+                                  $COMMON_ARGUMENTS \
                                   -Dsurefire.suiteXmlFiles=smoke.xml
                                 ;;
 
                             regression)
                                 mvn clean test \
-                                  -Denv="$ENVIRONMENT" \
+                                  $COMMON_ARGUMENTS \
                                   -Dsurefire.suiteXmlFiles=regression.xml
                                 ;;
 
                             unit)
                                 mvn clean test \
-                                  -Denv="$ENVIRONMENT" \
+                                  $COMMON_ARGUMENTS \
                                   -Dsurefire.suiteXmlFiles=unit.xml
                                 ;;
 
                             integration)
                                 mvn clean test \
-                                  -Denv="$ENVIRONMENT" \
+                                  $COMMON_ARGUMENTS \
                                   -Dsurefire.suiteXmlFiles=integration.xml
                                 ;;
 
                             full)
                                 mvn clean test \
-                                  -Denv="$ENVIRONMENT"
+                                  $COMMON_ARGUMENTS
                                 ;;
 
                             *)
