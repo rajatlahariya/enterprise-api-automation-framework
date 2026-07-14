@@ -32,13 +32,6 @@ public final class ConfigManager {
 		return getRequiredProperty("auth.admin.password");
 	}
 
-	public static String getUsername() {
-		return getAdminUsername();
-	}
-
-	public static String getPassword() {
-		return getAdminPassword();
-	}
 
 	public static String getClientId() {
 		return getRequiredProperty("auth.client.id");

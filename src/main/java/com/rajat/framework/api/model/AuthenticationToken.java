@@ -2,7 +2,7 @@ package com.rajat.framework.api.model;
 
 import java.time.Instant;
 
-public class AuthenticationToken {
+public final class AuthenticationToken {
 
     private final String accessToken;
     private final String refreshToken;

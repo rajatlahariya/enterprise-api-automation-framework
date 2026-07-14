@@ -14,8 +14,8 @@ public final class AuthenticationFactory {
 
     public static AuthenticationProvider basic() {
         return new BasicAuthenticationProvider(
-                ConfigManager.getUsername(),
-                ConfigManager.getPassword()
+                ConfigManager.getAdminUsername(),
+                ConfigManager.getAdminPassword()
         );
     }
 

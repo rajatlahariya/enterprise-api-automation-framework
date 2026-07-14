@@ -2,7 +2,6 @@ package com.rajat.framework.api.client;
 
 import static io.restassured.RestAssured.given;
 
-import java.time.Duration;
 import java.util.Map;
 
 import com.rajat.framework.api.builder.QueryParameterBuilder;
@@ -16,12 +15,11 @@ import com.rajat.framework.api.model.user.CreateUserRequest;
 import com.rajat.framework.api.model.user.UpdateUserRequest;
 import com.rajat.framework.api.model.user.User;
 import com.rajat.framework.api.model.user.UserSearchCriteria;
-import com.rajat.framework.core.retry.RetryExecutor;
 
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
-public class UserClient extends BaseClient {
+public final class UserClient extends BaseClient {
 
 	public User createUser(CreateUserRequest request) {
 
@@ -96,8 +94,4 @@ public class UserClient extends BaseClient {
 		return UserPageMapper.from(apiResponse);
 	}
 
-	public User getUserByIdWithRetry(Integer id) {
-
-		return RetryExecutor.execute(() -> getUserById(id), 3, Duration.ofMillis(250));
-	}
 }

@@ -1,5 +1,8 @@
 package com.rajat.framework.data;
 
+import java.util.Locale;
+import java.util.UUID;
+
 import com.rajat.framework.api.model.user.CreateUserRequest;
 import com.rajat.framework.api.model.user.UpdateUserRequest;
 
@@ -14,9 +17,25 @@ public final class UserDataFactory {
 	}
 
 	public static CreateUserRequest createUser(String firstName, String lastName, Integer age, Boolean isActive) {
+		if (firstName == null || firstName.isBlank()) {
+			throw new IllegalArgumentException("First name cannot be null or blank.");
+		}
 
-		return new CreateUserRequest(firstName, lastName,
-				uniqueEmail(firstName.toLowerCase() + "." + lastName.toLowerCase()), age, isActive);
+		if (lastName == null || lastName.isBlank()) {
+			throw new IllegalArgumentException("Last name cannot be null or blank.");
+		}
+
+		String prefix = firstName.trim().toLowerCase(Locale.ROOT)
+				+ "."
+				+ lastName.trim().toLowerCase(Locale.ROOT);
+
+		return new CreateUserRequest(
+				firstName.trim(),
+				lastName.trim(),
+				uniqueEmail(prefix),
+				age,
+				isActive
+		);
 	}
 
 	public static UpdateUserRequest createUpdatedUser(String existingEmail) {
@@ -24,6 +43,6 @@ public final class UserDataFactory {
 	}
 
 	private static String uniqueEmail(String prefix) {
-		return prefix + "." + System.currentTimeMillis() + "@enterprise.test";
+		return prefix + "." + UUID.randomUUID() + "@enterprise.test";
 	}
 }

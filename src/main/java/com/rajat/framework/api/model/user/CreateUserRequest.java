@@ -1,6 +1,6 @@
 package com.rajat.framework.api.model.user;
 
-public class CreateUserRequest {
+public final class CreateUserRequest {
 
     private final String firstName;
     private final String lastName;

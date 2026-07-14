@@ -1,6 +1,6 @@
 package com.rajat.framework.api.model.user;
 
-public class UpdateUserRequest {
+public final class UpdateUserRequest {
 
     private final String firstName;
     private final String lastName;

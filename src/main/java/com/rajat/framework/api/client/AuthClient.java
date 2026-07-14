@@ -13,7 +13,7 @@ import com.rajat.framework.api.specification.RequestSpecificationFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
-public class AuthClient {
+public final class AuthClient {
 
     public ApiResponse login(LoginRequest loginRequest) {
 

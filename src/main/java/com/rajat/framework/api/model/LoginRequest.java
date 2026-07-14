@@ -1,6 +1,6 @@
 package com.rajat.framework.api.model;
 
-public class LoginRequest {
+public final class LoginRequest {
 
     private final String username;
     private final String password;
