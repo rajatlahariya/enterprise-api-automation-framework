@@ -2,7 +2,7 @@ package com.rajat.framework.api.model.user;
 
 import java.time.LocalDateTime;
 
-public class User {
+public final class User {
 
     private final Integer id;
     private final String firstName;

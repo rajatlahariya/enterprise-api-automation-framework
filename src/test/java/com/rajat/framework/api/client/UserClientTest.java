@@ -3,6 +3,8 @@ package com.rajat.framework.api.client;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import java.util.UUID;
+
 import org.testng.annotations.Test;
 import static org.hamcrest.Matchers.containsString;
 import com.rajat.framework.api.mapper.ErrorResponseMapper;
@@ -30,7 +32,7 @@ public class UserClientTest {
 	@Test
 	public void shouldCreateUserSuccessfully() {
 
-		String uniqueEmail = "automation.user." + System.currentTimeMillis() + "@enterprise.test";
+		String uniqueEmail = "automation.user." + UUID.randomUUID() + "@enterprise.test";
 
 		CreateUserRequest request = new CreateUserRequest("Automation", "User", uniqueEmail, 30, true);
 
@@ -50,7 +52,7 @@ public class UserClientTest {
 	@Test
 	public void shouldGetCreatedUserById() {
 
-		String uniqueEmail = "read.user." + System.currentTimeMillis() + "@enterprise.test";
+		String uniqueEmail = "read.user." + UUID.randomUUID() + "@enterprise.test";
 
 		CreateUserRequest request = new CreateUserRequest("Read", "User", uniqueEmail, 28, true);
 
@@ -105,7 +107,6 @@ public class UserClientTest {
 		ApiResponse deleteResponse = userClient.deleteUser(createdUser.getId());
 
 		AllureAttachmentManager.attachApiResponse("Delete User Response", deleteResponse);
-		//AllureAttachmentManager.attachApiResponse("Get Deleted User Response", getResponse);
 		assertThat(deleteResponse.getStatusCode(), equalTo(204));
 
 	}

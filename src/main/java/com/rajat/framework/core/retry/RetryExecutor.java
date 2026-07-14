@@ -20,6 +20,10 @@ public final class RetryExecutor {
 			throw new IllegalArgumentException("Maximum attempts must be at least one.");
 		}
 
+		if (delay.isNegative()) {
+			throw new IllegalArgumentException("Retry delay cannot be negative.");
+		}
+
 		RuntimeException lastException = null;
 
 		for (int attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -43,10 +47,6 @@ public final class RetryExecutor {
 	}
 
 	private static void sleep(Duration delay) {
-
-		if (delay.isNegative()) {
-			throw new IllegalArgumentException("Retry delay cannot be negative.");
-		}
 
 		if (delay.isZero()) {
 			return;

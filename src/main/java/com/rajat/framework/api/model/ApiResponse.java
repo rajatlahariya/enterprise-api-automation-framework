@@ -1,6 +1,7 @@
 package com.rajat.framework.api.model;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ApiResponse {
@@ -16,7 +17,9 @@ public class ApiResponse {
                        long responseTimeInMs) {
         this.statusCode = statusCode;
         this.body = body;
-        this.headers = headers == null ? Collections.emptyMap() : Collections.unmodifiableMap(headers);
+        this.headers = headers == null
+                ? Collections.emptyMap()
+                : Collections.unmodifiableMap(new LinkedHashMap<>(headers));
         this.responseTimeInMs = responseTimeInMs;
     }
 
@@ -33,7 +36,16 @@ public class ApiResponse {
     }
 
     public String getHeader(String name) {
-        return headers.get(name);
+        if (name == null) {
+            return null;
+        }
+
+        return headers.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(name))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
     }
 
     public long getResponseTimeInMs() {

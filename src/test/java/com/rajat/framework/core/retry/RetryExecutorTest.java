@@ -69,11 +69,18 @@ public class RetryExecutorTest {
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class, groups = { TestGroups.NEGATIVE })
-	public void shouldRejectNegativeRetryDelay() {
+	public void shouldRejectNegativeRetryDelayBeforeExecutingOperation() {
 
-		RetryExecutor.execute(() -> {
-			throw new RuntimeException("Temporary failure");
-		}, 2, Duration.ofMillis(-1));
+		AtomicInteger attempts = new AtomicInteger();
+
+		try {
+			RetryExecutor.execute(() -> {
+				attempts.incrementAndGet();
+				return "SUCCESS";
+			}, 2, Duration.ofMillis(-1));
+		} finally {
+			assertThat(attempts.get(), equalTo(0));
+		}
 	}
 
 	@Test(expectedExceptions = NullPointerException.class, groups = { TestGroups.NEGATIVE })

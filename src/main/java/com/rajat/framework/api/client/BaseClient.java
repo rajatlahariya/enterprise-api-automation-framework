@@ -8,19 +8,11 @@ import io.restassured.specification.RequestSpecification;
 
 public abstract class BaseClient {
 
-    protected RequestSpecification publicJsonSpecification() {
-        return RequestSpecificationFactory.buildJsonSpecification();
-    }
-
     protected RequestSpecification authenticatedJsonSpecification() {
         String accessToken = TokenManager.getToken().getAccessToken();
 
         return RequestSpecificationFactory.buildJsonSpecification(
                 AuthenticationFactory.bearerToken(accessToken)
         );
-    }
-
-    protected RequestSpecification basicAuthJsonSpecification() {
-        return RequestSpecificationFactory.buildBasicAuthJsonSpecification();
     }
 }

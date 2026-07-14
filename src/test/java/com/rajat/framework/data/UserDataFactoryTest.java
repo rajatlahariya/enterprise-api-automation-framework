@@ -28,6 +28,19 @@ public class UserDataFactoryTest {
 	}
 
 	@Test
+	public void shouldGenerateUniqueEmailsForConsecutiveUsers() {
+		CreateUserRequest first = UserDataFactory.createDefaultUser();
+		CreateUserRequest second = UserDataFactory.createDefaultUser();
+
+		assertThat(first.getEmail().equals(second.getEmail()), equalTo(false));
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	public void shouldRejectBlankFirstName() {
+		UserDataFactory.createUser(" ", "User", 30, true);
+	}
+
+	@Test
 	public void shouldCreateUpdatedUserDataWithExistingEmail() {
 
 		String existingEmail = "existing.user@enterprise.test";

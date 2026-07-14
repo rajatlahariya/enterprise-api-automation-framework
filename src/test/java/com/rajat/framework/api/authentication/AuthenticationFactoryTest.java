@@ -4,12 +4,10 @@ import org.testng.annotations.Test;
 
 import com.rajat.framework.testgroup.TestGroups;
 
-import io.restassured.specification.RequestSpecification;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 
-@Test(groups = {TestGroups.UNIT, TestGroups.REGRESSION, TestGroups.AUTHENTICATION})
+@Test(groups = { TestGroups.UNIT, TestGroups.REGRESSION, TestGroups.AUTHENTICATION })
 public class AuthenticationFactoryTest {
 
 	@Test
