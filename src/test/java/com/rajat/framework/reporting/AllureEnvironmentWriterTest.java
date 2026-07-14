@@ -8,6 +8,9 @@ import java.nio.file.Path;
 
 import org.testng.annotations.Test;
 
+import com.rajat.framework.testgroup.TestGroups;
+
+@Test(groups = { TestGroups.UNIT, TestGroups.REGRESSION })
 public class AllureEnvironmentWriterTest {
 
 	@Test

@@ -21,6 +21,12 @@ public final class RequestSpecificationFactory {
     public static RequestSpecification buildJsonSpecification(
             AuthenticationProvider authenticationProvider) {
 
+        if (authenticationProvider == null) {
+            throw new IllegalArgumentException(
+                    "Authentication provider cannot be null."
+            );
+        }
+
         RequestSpecification specification = new RequestSpecBuilder()
                 .setBaseUri(ConfigManager.getBaseUrl())
                 .setContentType(ContentType.JSON)

@@ -12,10 +12,15 @@ import com.rajat.framework.api.model.common.PagedResult;
 import com.rajat.framework.api.model.user.CreateUserRequest;
 import com.rajat.framework.api.model.user.User;
 import com.rajat.framework.api.model.user.UserSearchCriteria;
+import com.rajat.framework.testgroup.TestGroups;
 
 public class UserParallelTest {
 
-	@Test(invocationCount = 10, threadPoolSize = 5)
+	@Test(
+		groups = { TestGroups.INTEGRATION, TestGroups.REGRESSION, TestGroups.CRUD },
+		invocationCount = 10,
+		threadPoolSize = 5
+	)
 	public void shouldCreateUsersInParallel() {
 
 		UserClient client = new UserClient();
@@ -24,13 +29,25 @@ public class UserParallelTest {
 
 		CreateUserRequest request = new CreateUserRequest("Parallel", "User", email, 30, true);
 
-		User created = client.createUser(request);
+		User created = null;
 
-		assertThat(created.getEmail(), equalTo(email));
-		assertThat(TokenManager.getToken(), notNullValue());
+		try {
+			created = client.createUser(request);
+
+			assertThat(created.getEmail(), equalTo(email));
+			assertThat(TokenManager.getToken(), notNullValue());
+		} finally {
+			if (created != null) {
+				client.deleteUser(created.getId());
+			}
+		}
 	}
 
-	@Test(invocationCount = 20, threadPoolSize = 10)
+	@Test(
+		groups = { TestGroups.INTEGRATION, TestGroups.REGRESSION, TestGroups.SEARCH },
+		invocationCount = 20,
+		threadPoolSize = 10
+	)
 	public void shouldSearchUsersInParallel() {
 
 		UserClient client = new UserClient();

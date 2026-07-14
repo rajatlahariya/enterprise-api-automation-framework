@@ -4,8 +4,11 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.rajat.framework.testgroup.TestGroups;
+
 import com.rajat.framework.api.model.ApiResponse;
 
+@Test(groups = { TestGroups.UNIT, TestGroups.REGRESSION })
 public class AllureAttachmentManagerTest {
 
 	@Test
